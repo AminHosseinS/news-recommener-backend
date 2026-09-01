@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD :str
     POSTGRES_DB :str
 
+    QDRANT_URL :str | None = None
+    QDRANT_LOCAL_PATH :str
+
     model_config = SettingsConfigDict(
         env_file="./.env",
         env_ignore_empty=True,
