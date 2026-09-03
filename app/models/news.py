@@ -25,7 +25,7 @@ class News(Base):
     source_id: Mapped[Optional[int]] = mapped_column(ForeignKey("news_sources.id", ondelete="SET NULL"))
     title: Mapped[str] = mapped_column(String(500))
     link: Mapped[str] = mapped_column(Text, unique=True)
-    ai_summary: Mapped[str] = mapped_column(Text)
+    ai_summary: Mapped[Optional[str]] = mapped_column(Text,nullable=True)
     image_url: Mapped[Optional[str]] = mapped_column(Text)
     tags: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default='{}')
     pub_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -33,6 +33,7 @@ class News(Base):
     view_count: Mapped[int] = mapped_column(default=0)
     like_count: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    time_validity: Mapped[str] = mapped_column(String(20), server_default='daily-news')
 
     # ارتباطات
     source: Mapped[Optional["NewsSource"]] = relationship(back_populates="news")
