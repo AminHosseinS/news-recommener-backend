@@ -29,7 +29,7 @@ class News(Base):
     image_url: Mapped[Optional[str]] = mapped_column(Text)
     tags: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default='{}')
     pub_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(String(20), server_default='processed')
+    status: Mapped[str] = mapped_column(String(20), server_default='PENDING')
     view_count: Mapped[int] = mapped_column(default=0)
     like_count: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

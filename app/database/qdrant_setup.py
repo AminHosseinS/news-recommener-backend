@@ -5,7 +5,7 @@ from qdrant_client.http.models import VectorParams, Distance
 
 async  def init_qdrant_collections(client: AsyncQdrantClient,recreate_if_exists: bool=False) :
     collection_name = "news_articles"
-    vector_size = 768 # needs to be exact as embedding model
+    vector_size = 1024 # needs to be exact as embedding model
 
     if recreate_if_exists:
         await client.delete_collection(collection_name)

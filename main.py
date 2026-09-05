@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
 
     await init_qdrant_collections(
         client=qdrant.qdrant_client,
-        recreate_if_exists=True # Only on dev should be True
+        recreate_if_exists=False # Only on dev should be True for dropping qdrant db
     )
 
     yield
