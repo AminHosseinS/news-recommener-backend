@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base import Base
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -17,8 +18,13 @@ class User(Base):
     favorite_tags: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default='{}')
     interest_vector: Mapped[Optional[list[float]]] = mapped_column(ARRAY(REAL))
     is_active: Mapped[bool] = mapped_column(default=True)
+
+    otp_code: Mapped[Optional[str]] = mapped_column(String(6))
+    otp_expire: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    last_active: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    last_active: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                  onupdate=func.now())
 
     # ارتباطات
     interactions: Mapped[List["UserInteraction"]] = relationship(back_populates="user")

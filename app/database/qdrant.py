@@ -2,15 +2,15 @@ from typing import AsyncGenerator
 
 from qdrant_client import AsyncQdrantClient
 
-from app.database.config import settings
+from app.core.config import qdrant_settings
 
 qdrant_client : AsyncQdrantClient | None = None
 
 def init_qdrant_client():
-    if settings.QDRANT_URL:
-        return AsyncQdrantClient(url=settings.QDRANT_URL)
+    if qdrant_settings.QDRANT_URL:
+        return AsyncQdrantClient(url=qdrant_settings.QDRANT_URL)
 
-    return AsyncQdrantClient(path=settings.QDRANT_LOCAL_PATH)
+    return AsyncQdrantClient(path=qdrant_settings.QDRANT_LOCAL_PATH)
 
 async def get_qdrant() -> AsyncGenerator[AsyncQdrantClient, None]:
     if qdrant_client is None:
