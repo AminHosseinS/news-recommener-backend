@@ -9,8 +9,7 @@ from app.database.session import get_db
 from app.crud.crud_user import get_user_by_id
 from app.models.user import User
 
-# این آدرس باید دقیقاً با مسیری که اندپوینت لاگین را ثبت کرده‌اید برابر باشد
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 async def get_current_user(
         db: AsyncSession = Depends(get_db),

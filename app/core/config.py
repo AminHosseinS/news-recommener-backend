@@ -40,6 +40,16 @@ class AuthSettings(BaseSettings):
         extra="ignore"
     )
 
+class RedisSettings(BaseSettings):
+    REDIS_URL: str
+    model_config = SettingsConfigDict(
+        env_file="./.env",
+        env_ignore_empty=True,
+        extra="ignore"
+    )
+
+
 db_settings = DatabaseSettings()
 qdrant_settings = QdrantSettings()
 auth_settings = AuthSettings()
+redis_settings = RedisSettings()
