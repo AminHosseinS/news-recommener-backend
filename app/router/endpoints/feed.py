@@ -9,20 +9,20 @@ from app.database.redis import get_redis
 from app.router.deps import get_current_user
 from app.models.user import User
 from app.schemas.feed import WebFeedResponse, TrackImpressionRequest, NewsFeedItem
-from app.services.feed_service import get_personalized_feed, SEEN_NEWS_TTL
+from app.services.feed_service import get_personalized_feed, bg_process_interactions
 
 router = APIRouter()
 
-@router.get("/web",response_model=WebFeedResponse)
+@router.get("/web", response_model=WebFeedResponse)
 async def get_web_feed(
-    background_tasks: BackgroundTasks,
-    offset: int = 0,
-    limit: int = 10,
-    refresh: bool = False,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-    redis_client: redis.Redis = Depends(get_redis),
-    qdrant_client: AsyncQdrantClient = Depends(get_qdrant)
+        background_tasks: BackgroundTasks,
+        offset: int = 0,
+        limit: int = 10,
+        refresh: bool = False,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db),
+        redis_client: redis.Redis = Depends(get_redis),
+        qdrant_client: AsyncQdrantClient = Depends(get_qdrant)
 ):
     news_list = await get_personalized_feed(
         user=current_user,
@@ -47,21 +47,23 @@ async def get_web_feed(
 @router.post("/web/track-view")
 async def track_web_impression(
         request: TrackImpressionRequest,
+        background_tasks: BackgroundTasks,
         current_user: User = Depends(get_current_user),
-        redis_client: redis.Redis = Depends(get_redis)
+        redis_client: redis.Redis = Depends(get_redis),
+        qdrant_client: AsyncQdrantClient = Depends(get_qdrant)
 ):
-    if not request.news_ids:
+    if not request.interactions:
         return {"status": "ignored"}
 
-    seen_key = f"seen_news:{current_user.id}"
+    background_tasks.add_task(
+        bg_process_interactions,
+        user_id=current_user.id,
+        request=request,
+        redis_client=redis_client,
+        qdrant_client=qdrant_client
+    )
 
-    await redis_client.sadd(seen_key, *request.news_ids)
-
-    await redis_client.expire(seen_key, SEEN_NEWS_TTL)
-
-    return {"status": "success", "tracked_count": len(request.news_ids)}
-
-
+    return {"status": "success", "tracked_count": len(request.interactions)}
 
 # needs rework !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @router.post("/bot/next-news")

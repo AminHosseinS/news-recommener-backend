@@ -1,6 +1,13 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Literal
 
+ActionType = Literal[
+    "like",
+    "share",
+    "read_more",
+    "bookmark",
+    "hide"
+]
 
 class NewsFeedItem(BaseModel):
     id: int
@@ -17,5 +24,10 @@ class WebFeedResponse(BaseModel):
     data: List[NewsFeedItem]
     next_offset: Optional[int]
 
+class InteractionItem(BaseModel):
+    news_id: int
+    actions: List[ActionType] = []
+    duration: int = 0  # second
+
 class TrackImpressionRequest(BaseModel):
-    news_ids: List[int]
+    interactions: List[InteractionItem]
