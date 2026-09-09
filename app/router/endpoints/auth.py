@@ -17,10 +17,8 @@ async def send_otp_sms(
 ):
     otp_code = await crud_user.create_user_or_set_otp(db, data.phone_number)
 
-    sms_text = f"""<#> کد تایید شما: {otp_code}
-@app.chaarset.ir #{otp_code}"""
+    sms_text = f"""<#> کد تایید شما: {otp_code}"""
 
-    # چاپ در کنسول برای تست بک‌اند
     print(f"SMS SENT to {data.phone_number}:\n{sms_text}")
 
     return {"message": "کد تایید ارسال شد"}

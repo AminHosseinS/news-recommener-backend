@@ -1,6 +1,7 @@
 from typing import List
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import redis.asyncio as redis
 from qdrant_client import AsyncQdrantClient
@@ -13,6 +14,9 @@ from app.models.user import User
 from app.schemas.feed import WebFeedResponse, TrackImpressionRequest, NewsFeedItem, NewsSearchResponse
 from app.services.feed_service import get_personalized_feed, bg_process_interactions
 from app.services.search_service import execute_search
+from app.schemas.feed import NewsListItem
+from app.models.news import News
+from app.schemas.feed import NewsDetailResponse
 
 router = APIRouter()
 
@@ -68,7 +72,7 @@ async def track_web_impression(
 
     return {"status": "success", "tracked_count": len(request.interactions)}
 
-@router.get("/search", response_model=List[NewsSearchResponse])
+@router.get("/search", response_model=List[NewsListItem])
 async def search_news(
     q: str = Query(..., min_length=2, description="Search Query"),
     limit: int = Query(10, ge=1, le=50, description="Result Count"),
@@ -78,6 +82,25 @@ async def search_news(
 ):
     results = await execute_search(db=db, qdrant=qdrant, query=q, limit=limit)
     return results
+
+
+@router.get("/{news_id}", response_model=NewsDetailResponse)
+async def get_single_news(
+        news_id: int,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+
+    result = await db.execute(select(News).where(News.id == news_id))
+    news = result.scalars().first()
+
+    if not news:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="خبر مورد نظر یافت نشد"
+        )
+
+    return news
 
 # needs rework !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @router.post("/bot/next-news")

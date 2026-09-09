@@ -30,7 +30,6 @@ VECTOR_CACHE_TTL = 7 * 24 * 3600
 
 
 async def _rescore_and_sort_news(db: AsyncSession, qdrant_scores: dict) -> List[int]:
-    """تابع کمکی داخلی برای اعمال decay روی نتایج Qdrant"""
     if not qdrant_scores:
         return []
 

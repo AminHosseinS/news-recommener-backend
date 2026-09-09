@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from typing import List, Optional, Literal
 
 ActionType = Literal[
@@ -40,6 +40,35 @@ class NewsSearchResponse(BaseModel):
     title: str
     image_url: Optional[str] = None
     ai_summary: Optional[str] = None
+    tags: List[str] = []
+    pub_date: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class NewsListItem(BaseModel):
+    id: int
+    title: str
+    ai_summary: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('ai_summary', mode='before')
+    @classmethod
+    def truncate_summary(cls, v: Optional[str]) -> Optional[str]:
+        if isinstance(v, str) and len(v) > 200:
+            return v[:200] + "..."
+        return v
+
+class PaginatedNewsListResponse(BaseModel):
+    data: List[NewsListItem]
+    next_offset: Optional[int] = None
+
+class NewsDetailResponse(BaseModel):
+    id: int
+    title: str
+    image_url: Optional[str] = None
+    ai_summary: Optional[str] = None
+    link: str
     tags: List[str] = []
     pub_date: datetime
 
