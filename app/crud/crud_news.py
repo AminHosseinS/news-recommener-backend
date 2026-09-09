@@ -1,4 +1,3 @@
-# app/crud/crud_news.py
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Set, Any
 from sqlalchemy import select, or_
@@ -42,5 +41,14 @@ async def get_news_by_ids_sorted(db: AsyncSession, news_ids: List[int]) -> List[
     res = await db.execute(stmt)
     news_rows = res.scalars().all()
     news_dict = {n.id: n for n in news_rows}
-    # بازگرداندن خبرها با حفظ ترتیب آی‌دی‌های ورودی
     return [news_dict[nid] for nid in news_ids if nid in news_dict]
+
+async def search_news_by_title(db: AsyncSession, query: str, limit: int = 10) -> List[int]:
+    search_pattern = f"%{query}%"
+    stmt = select(News.id).where(
+        News.title.ilike(search_pattern),
+        News.status == "READY"
+    ).order_by(News.pub_date.desc()).limit(limit)
+
+    res = await db.execute(stmt)
+    return list(res.scalars().all())

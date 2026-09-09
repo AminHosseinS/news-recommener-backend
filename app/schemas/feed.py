@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 from typing import List, Optional, Literal
 
@@ -31,3 +33,14 @@ class InteractionItem(BaseModel):
 
 class TrackImpressionRequest(BaseModel):
     interactions: List[InteractionItem]
+
+
+class NewsSearchResponse(BaseModel):
+    id: int
+    title: str
+    image_url: Optional[str] = None
+    ai_summary: Optional[str] = None
+    tags: List[str] = []
+    pub_date: datetime
+
+    model_config = ConfigDict(from_attributes=True)

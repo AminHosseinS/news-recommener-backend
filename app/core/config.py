@@ -48,8 +48,18 @@ class RedisSettings(BaseSettings):
         extra="ignore"
     )
 
+class OllamaSettings(BaseSettings):
+    OLLAMA_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "bge-m3"
+
+    model_config = SettingsConfigDict(
+        env_file="./.env",
+        env_ignore_empty=True,
+        extra="ignore"
+    )
 
 db_settings = DatabaseSettings()
 qdrant_settings = QdrantSettings()
 auth_settings = AuthSettings()
 redis_settings = RedisSettings()
+ollama_settings = OllamaSettings()

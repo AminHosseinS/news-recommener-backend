@@ -1,4 +1,6 @@
-from fastapi import APIRouter, BackgroundTasks, Depends
+from typing import List
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 import redis.asyncio as redis
 from qdrant_client import AsyncQdrantClient
@@ -8,8 +10,9 @@ from app.database.qdrant import get_qdrant
 from app.database.redis import get_redis
 from app.router.deps import get_current_user
 from app.models.user import User
-from app.schemas.feed import WebFeedResponse, TrackImpressionRequest, NewsFeedItem
+from app.schemas.feed import WebFeedResponse, TrackImpressionRequest, NewsFeedItem, NewsSearchResponse
 from app.services.feed_service import get_personalized_feed, bg_process_interactions
+from app.services.search_service import execute_search
 
 router = APIRouter()
 
@@ -64,6 +67,17 @@ async def track_web_impression(
     )
 
     return {"status": "success", "tracked_count": len(request.interactions)}
+
+@router.get("/search", response_model=List[NewsSearchResponse])
+async def search_news(
+    q: str = Query(..., min_length=2, description="Search Query"),
+    limit: int = Query(10, ge=1, le=50, description="Result Count"),
+    db: AsyncSession = Depends(get_db),
+    qdrant: AsyncQdrantClient = Depends(get_qdrant),
+    current_user: User = Depends(get_current_user)
+):
+    results = await execute_search(db=db, qdrant=qdrant, query=q, limit=limit)
+    return results
 
 # needs rework !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @router.post("/bot/next-news")
