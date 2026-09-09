@@ -36,3 +36,18 @@ async def clear_user_otp(db: AsyncSession, user: User):
     user.otp_code = None
     user.otp_expire = None
     await db.commit()
+
+
+async def update_user_tags_and_vector(
+        db: AsyncSession,
+        user: User,
+        tags: list[str],
+        vector: list[float] | None
+) -> User:
+    user.favorite_tags = tags
+    if vector is not None:
+        user.interest_vector = vector
+
+    await db.commit()
+    await db.refresh(user)
+    return user
