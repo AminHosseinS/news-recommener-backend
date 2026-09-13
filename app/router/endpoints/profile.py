@@ -11,6 +11,7 @@ from app.services import user_service
 from app.services import bookmark_service
 from app.crud import crud_bookmark
 from app.schemas.feed import PaginatedNewsListResponse
+from app.schemas.user import UserProfileResponse
 
 router = APIRouter()
 
@@ -72,4 +73,13 @@ async def get_bookmarked_news_list(
     return PaginatedNewsListResponse(
         data=news_list,
         next_offset=next_offset
+    )
+
+@router.get("/me", response_model=UserProfileResponse)
+async def get_user_profile(
+        current_user: User = Depends(get_current_user)
+):
+    return UserProfileResponse(
+        phone_number=current_user.phone_number,
+        is_connected_to_bale=bool(current_user.bale_chat_id)
     )

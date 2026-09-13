@@ -204,8 +204,19 @@ async def get_personalized_feed(
                 print(f"Qdrant/Rescoring Error: {e}")
                 fetched_ids = []
 
+        if len(fetched_ids) < 50:
+            exclude_ids = list(set(seen_ids + fetched_ids))
+            fallback_needed = 50 - len(fetched_ids)
+
+            fallback_ids = await get_fallback_news_ids(db, exclude_ids, limit=fallback_needed)
+            if fallback_ids:
+                fetched_ids.extend(fallback_ids)
+
         if not fetched_ids:
-            fetched_ids = await get_fallback_news_ids(db, seen_ids, limit=50)
+            return []
+
+        zadd_data = {str(nid): score for score, nid in enumerate(fetched_ids)}
+        await redis_client.zadd(feed_key, zadd_data)
 
         if not fetched_ids:
             return []
